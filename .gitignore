@@ -1,0 +1,19 @@
+﻿# PlatformIO build artifacts
+.pio/
+.pioenvs/
+.piolibdeps/
+.venv/
+
+# Secrets - NEVER commit this file
+include/secrets.h
+
+# IDE files
+.vscode/
+*.suo
+*.user
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
