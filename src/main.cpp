@@ -19,6 +19,18 @@
 #define GREEN_LED_PIN  14
 #define RED_LED_PIN    13
 
+// Most standard 5V relay modules are Active-LOW (LOW turns relay ON, HIGH turns it OFF).
+// If your relay is Active-HIGH, change this to false.
+#define RELAY_ACTIVE_LOW true
+
+#if RELAY_ACTIVE_LOW
+  #define RELAY_ON  LOW
+  #define RELAY_OFF HIGH
+#else
+  #define RELAY_ON  HIGH
+  #define RELAY_OFF LOW
+#endif
+
 // ---------- DHT ----------
 // disableIRQ=false fixes timing issues on ESP32 240MHz
 DHT dht(DHT_PIN, DHT_TYPE);
@@ -78,8 +90,8 @@ void setup() {
   pinMode(GREEN_LED_PIN, OUTPUT);
   pinMode(RED_LED_PIN,   OUTPUT);
 
-  // Everything OFF at start (relay is active HIGH in your code)
-  digitalWrite(RELAY_PIN,     LOW);
+  // Everything OFF at start
+  digitalWrite(RELAY_PIN,     RELAY_OFF);
   digitalWrite(BUZZER_PIN,    LOW);
   digitalWrite(GREEN_LED_PIN, LOW);
   digitalWrite(RED_LED_PIN,   LOW);
@@ -92,13 +104,19 @@ void setup() {
   Serial.println("System ready.");
   Serial.println();
 
-  // LED startup test
-  Serial.println("LED test...");
+  // Hardware startup test
+  Serial.println("LED & Relay self-test...");
   digitalWrite(GREEN_LED_PIN, HIGH); delay(400);
   digitalWrite(GREEN_LED_PIN, LOW);
   digitalWrite(RED_LED_PIN,   HIGH); delay(400);
   digitalWrite(RED_LED_PIN,   LOW);
-  Serial.println("LED test done.");
+
+  // Relay self-test (audible click)
+  Serial.println("Relay test: Triggering for 1 second (listen for click)...");
+  digitalWrite(RELAY_PIN, RELAY_ON);
+  delay(1000);
+  digitalWrite(RELAY_PIN, RELAY_OFF);
+  Serial.println("Relay test complete.");
   Serial.println();
 }
 
@@ -183,16 +201,22 @@ void loop() {
     if (millis() - lastWateringTime > WATERING_COOLDOWN) {
       Serial.println();
       Serial.println(">>> SOIL DRY + TANK OK - STARTING PUMP <<<");
-      digitalWrite(RELAY_PIN, HIGH);
+      digitalWrite(RELAY_PIN, RELAY_ON);
       pumpRunning     = true;
       pumpStartTime   = millis();
       lastWateringTime = millis();
+    } else {
+      Serial.print("Pump: In cooldown (");
+      Serial.print((WATERING_COOLDOWN - (millis() - lastWateringTime)) / 1000);
+      Serial.println("s remaining)");
     }
+  } else if (soilDry && waterLow) {
+    Serial.println(">>> PUMP INHIBITED: Soil dry, but Tank is LOW (submerge water sensor or lower threshold)! <<<");
   }
 
   // Stop pump after run time
   if (pumpRunning && (millis() - pumpStartTime >= PUMP_RUN_TIME)) {
-    digitalWrite(RELAY_PIN, LOW);
+    digitalWrite(RELAY_PIN, RELAY_OFF);
     pumpRunning = false;
     Serial.println(">>> WATERING CYCLE COMPLETE - PUMP OFF <<<");
   }
