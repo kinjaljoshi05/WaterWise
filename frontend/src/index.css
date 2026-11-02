@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@keyframes gentle-sway {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  25% {
+    transform: rotate(1.5deg) translateY(-2px);
+  }
+  75% {
+    transform: rotate(-1.5deg) translateY(1px);
+  }
+}
+
+@keyframes blink {
+  0%, 90%, 100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes float-bubble {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes water-droplet {
+  0% {
+    transform: translateY(-8px) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(12px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.animate-sway {
+  animation: gentle-sway 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-blink {
+  animation: blink 4s infinite;
+  transform-origin: center;
+}
+
+.animate-float {
+  animation: float-bubble 3s ease-in-out infinite;
+}
+
+.animate-droplet {
+  animation: water-droplet 1.5s infinite;
+}
